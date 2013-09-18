@@ -25,7 +25,7 @@ def run_subject(subtc_file, tc_subset=False):
     subtc_df = pd.read_csv(subtc_file, sep=None)
     if tc_subset:
         col_subset = [col for net in tc_subset for col in subtc_df.columns if net in col]
-        subtc_df = subtc[col_subset]
+        subtc_df = subtc_df[col_subset]
     subtc_zscored = pd.DataFrame(zscore(subtc_df), columns=subtc_df.columns)
     sub_cv, sub_precision = estimate_sub(subtc_zscored)
     sub_cv1D = utils.flat_triu(sub_cv)
@@ -38,8 +38,8 @@ def main(datadir, outdir, outname, tc_files, tc_subset=False):
     group_cv = {}   #Create empty dataframe to hold group data
     group_precision = {}   #Create empty dataframe to hold group data
     for subtc_file in tc_files:
-        subid = utils.get_subid(subtc_file, tc_subset=tc_subset)
-        sub_cv, sub_precision = run_subject(subtc_file)
+        subid = utils.get_subid(subtc_file)
+        sub_cv, sub_precision = run_subject(subtc_file, tc_subset)
         group_cv[subid] = sub_cv
         group_precision[subid] = sub_precision        
     cv_outfile = os.path.join(outdir, ''.join(['Covariance_',outname,'.csv']))
