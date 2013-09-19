@@ -10,11 +10,11 @@ import numpy as np
 ####################### Set parameters################
 basedir = '/home/jagust/rsfmri_ica/CPAC/connectivity'
 datadir = '/home/jagust/rsfmri_ica/CPAC/connectivity/matrices'
-nnodes = 54
+nnodes = 39
 modeldir = '/home/jagust/rsfmri_ica/GIFT/models/Old'
 des_file = os.path.join(modeldir, 'Covariate_Old_log_demeaned.mat')
 con_file = os.path.join(modeldir, 'Covariate_Old_log_demeaned.con')
-resultsglob = '*Greicius_90rois_0-01_0-08_subset.csv'
+resultsglob = '*MSDL_rois_0-01_0-08.csv'
 ##############################################################
 
 
