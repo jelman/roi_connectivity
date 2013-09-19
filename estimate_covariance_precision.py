@@ -17,6 +17,7 @@ def save_group_data(data_dict, outfile):
     
 
 def estimate_sub(tc_array):
+    estimator = covariance.GraphLassoCV()
     estimator.fit(tc_array)
     return estimator.covariance_, estimator.precision_
 
@@ -52,16 +53,15 @@ if __name__ == '__main__':
 
 
     #### Set parameters #######
-    datadir = '/home/jagust/rsfmri_ica/CPAC/connectivity/timecourses'
+    datadir = '/home/jagust/rsfmri_ica/CPAC/connectivity/timecourses/MSDL_rois'
     outdir = '/home/jagust/rsfmri_ica/CPAC/connectivity/matrices'
-    outname = 'Greicius_90rois_0.01_0.08'
+    outname = 'MSDL_rois_0-01_0-08'
     tc_glob = 'B*_timecourses.csv'
     tc_files = glob(os.path.join(datadir, tc_glob))
     tc_files.sort()
-    tc_subset = ['anterior_Salience','dDMN','LECN','post_Salience','Precuneus',
-                'RECN','vDMN','Visuospatial']
+    tc_subset = ['DMN','DLPFC','Par','Post_Temp','Front_pol','IPS','LOC','ACC','STS','Ins','Cing']
     ###########################
 
-    main(datadir, outdir, outname, tc_files, tc_subset)
+    main(datadir, outdir, outname, tc_files)
 
 
