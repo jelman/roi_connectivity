@@ -1,4 +1,4 @@
-import sys
+import os, sys
 sys.path.append("/home/jagust/jelman/CODE/cluster_roi")
 from make_local_connectivity_tcorr import *
 from binfile_parcellation import *
@@ -13,7 +13,7 @@ from glob import glob
 outdir = '/home/jagust/rsfmri_ica/cluster_roi'
 
 # the name of the maskfile that we will be using
-maskname='/home/jagust/rsfmri_ica/CPAC/rsfmriMask_3mm.nii.gz'
+maskname='/home/jagust/rsfmri_ica/CPAC/rsfmriMask_GM20_3mm.nii.gz'
 
 # make a list of all of the input fMRI files that we will be using
 data_glob = '/home/jagust/rsfmri_ica/CPAC/pipeline_rsfmri/B*/functional_mni/_scan_func_B*_4d/_csf_threshold_0.96/_gm_threshold_0.7/_wm_threshold_0.96/_compcor_ncomponents_5_selector_pc10.linear1.wm1.global0.motion1.quadratic1.gm0.compcor0.csf1/_bandpass_freqs_0.01.0.08/bandpassed_demeaned_filtered_warp.nii.gz'
@@ -22,7 +22,9 @@ infiles = sort(glob(data_glob))
 # set threshold for individual connectivity matrics (r>.5 used in the paper)
 thresh = .5
 ##############################################################
+T0 = time()
 
+os.chdir(outdir)
 
 ##### Step 1. Individual Connectivity Matrices 
 # construct the connectivity matrices using tcorr and a threshold
@@ -48,8 +50,8 @@ NUM_CLUSTERS = [100,150,200]
 for idx, in_file in enumerate(infiles):
 
     # construct filenames
-    infile='rm_tcorr_conn_'+str(idx)+'.npy'
-    outfile='rm_tcorr_indiv_cluster_'+str(idx)
+    infile=os.path.join(outdir,'rm_tcorr_conn_'+str(idx)+'.npy')
+    outfile=os.path.join(outdir, 'rm_tcorr_indiv_cluster_'+str(idx))
 
     print 'tcorr parcellate',in_file
     binfile_parcellate(infile, outfile, NUM_CLUSTERS)
@@ -61,15 +63,6 @@ for idx, in_file in enumerate(infiles):
 # for both group-mean and 2-level clustering we need to know the number of
 # nonzero voxels in in the mask 
 mask_voxels=(nb.load(maskname).get_data().flatten()>0).sum()
-
-# group_mean clustering is pretty simple, input the connectivity files and run.
-# we can perform multiple clusterings with this function, so once again the
-# output filename is a prefix
-tcorr_conn_files=['rm_tcorr_conn_0.npy','rm_tcorr_conn_1.npy',\
-    'rm_tcorr_conn_2.npy']
-print 'group-mean parcellate tcorr'
-group_mean_binfile_parcellate( tcorr_conn_files,\
-    'rm_group_mean_tcorr_cluster', NUM_CLUSTERS,mask_voxels);
     
 # the 2-level clustering has to be performed once for each desired clustering
 # level, and requires individual level clusterings as inputs
