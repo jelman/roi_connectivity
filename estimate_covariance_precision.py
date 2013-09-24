@@ -44,10 +44,14 @@ def main(datadir, outdir, outname, tc_files, tc_subset=None, subgroup=None):
     group_precision = {}   #Create empty dataframe to hold group data
     for subtc_file in tc_files:
         subid = utils.get_subid(subtc_file)
-        if subid in subgroup:
+        if subgroup and subid in subgroup:
             sub_cv, sub_precision = run_subject(subtc_file, tc_subset)
             group_cv[subid] = sub_cv
-            group_precision[subid] = sub_precision        
+            group_precision[subid] = sub_precision
+        else:
+            sub_cv, sub_precision = run_subject(subtc_file, tc_subset)
+            group_cv[subid] = sub_cv
+            group_precision[subid] = sub_precision    
     cv_outfile = os.path.join(outdir, ''.join(['Covariance_',outname,'.csv']))
     group_cv_df = save_group_data(group_cv, cv_outfile)
     precision_outfile = os.path.join(outdir, ''.join(['Precision_',outname,'.csv']))
@@ -58,9 +62,9 @@ if __name__ == '__main__':
 
 
     #### Set parameters #######
-    datadir = '/home/jagust/rsfmri_ica/GIFT/GICA_d75/roi_connectivity/timecourses'
-    outdir = '/home/jagust/rsfmri_ica/GIFT/GICA_d75/roi_connectivity/matrices'
-    outname = 'mancovan_preproc.csv'
+    datadir = '/home/jagust/rsfmri_ica/CPAC/connectivity/timecourses/Greicius_90_rois'
+    outdir = '/home/jagust/rsfmri_ica/CPAC/connectivity/matrices'
+    outname = 'Greicius_90rois_0-01_0-08_subset'
     tc_glob = 'B*_timecourses.csv'
     tc_files = glob(os.path.join(datadir, tc_glob))
     tc_files.sort()
@@ -71,6 +75,6 @@ if __name__ == '__main__':
         with open(subgroup_file) as f:
             subgroup = f.read().splitlines()
         
-    main(datadir, outdir, outname, tc_files, subgroup=subgroup)
+    main(datadir, outdir, outname, tc_files, subgroup=None)
 
 
