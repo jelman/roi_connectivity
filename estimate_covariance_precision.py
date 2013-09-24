@@ -17,7 +17,7 @@ def save_group_data(data_dict, outfile):
     
 
 def estimate_sub(tc_array):
-    estimator = covariance.GraphLassoCV()
+    estimator = covariance.GraphLassoCV(max_iter=500, verbose=True)
     estimator.fit(tc_array)
     np.fill_diagonal(estimator.covariance_, 0)
     np.fill_diagonal(estimator.precision_, 0)    
@@ -38,15 +38,16 @@ def run_subject(subtc_file, tc_subset=False):
     return sub_cv1D, sub_precision1D
 
 
-def main(datadir, outdir, outname, tc_files, tc_subset=False):
+def main(datadir, outdir, outname, tc_files, tc_subset=False, subgroup=False):
 
     group_cv = {}   #Create empty dataframe to hold group data
     group_precision = {}   #Create empty dataframe to hold group data
     for subtc_file in tc_files:
         subid = utils.get_subid(subtc_file)
-        sub_cv, sub_precision = run_subject(subtc_file, tc_subset)
-        group_cv[subid] = sub_cv
-        group_precision[subid] = sub_precision        
+        if subid in subgroup:
+            sub_cv, sub_precision = run_subject(subtc_file, tc_subset)
+            group_cv[subid] = sub_cv
+            group_precision[subid] = sub_precision        
     cv_outfile = os.path.join(outdir, ''.join(['Covariance_',outname,'.csv']))
     group_cv_df = save_group_data(group_cv, cv_outfile)
     precision_outfile = os.path.join(outdir, ''.join(['Precision_',outname,'.csv']))
@@ -57,15 +58,19 @@ if __name__ == '__main__':
 
 
     #### Set parameters #######
-    datadir = '/home/jagust/rsfmri_ica/CPAC/connectivity/timecourses/Greicius_90rois'
-    outdir = '/home/jagust/rsfmri_ica/CPAC/connectivity/matrices'
-    outname = 'Greicius_90rois_0-01_0-08_subset.csv'
+    datadir = '/home/jagust/rsfmri_ica/GIFT/GICA_d75/roi_connectivity/timecourses'
+    outdir = '/home/jagust/rsfmri_ica/GIFT/GICA_d75/roi_connectivity/matrices'
+    outname = 'mancovan_preproc.csv'
     tc_glob = 'B*_timecourses.csv'
     tc_files = glob(os.path.join(datadir, tc_glob))
     tc_files.sort()
-    tc_subset = ['anterior_Salience','dDMN','LECN','post_Salience','Precuneus','RECN','vDMN','Visuospatial']
+    tc_subset = None
+    subgroup_file = '/home/jagust/rsfmri_ica/Spreadsheets/Filelists/oldsubs.txt'
     ###########################
-
-    main(datadir, outdir, outname, tc_files, tc_subset)
+    if subgroup_file:
+        with open(subgroup_file) as f:
+            subgroup = f.read().splitlines()
+        
+    main(datadir, outdir, outname, tc_files, subgroup=subgroup)
 
 
