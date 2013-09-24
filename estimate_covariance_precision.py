@@ -38,8 +38,8 @@ def run_subject(subtc_file, tc_subset=None):
     return sub_cv1D, sub_precision1D
 
 
-def main(datadir, outdir, outname, tc_files, tc_subset=None, subgroup=None):
 
+def main(datadir, outdir, outname, tc_files, tc_subset=None, subgroup=None):
     group_cv = {}   #Create empty dataframe to hold group data
     group_precision = {}   #Create empty dataframe to hold group data
     for subtc_file in tc_files:
