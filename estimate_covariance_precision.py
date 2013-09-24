@@ -19,6 +19,8 @@ def save_group_data(data_dict, outfile):
 def estimate_sub(tc_array):
     estimator = covariance.GraphLassoCV()
     estimator.fit(tc_array)
+    np.fill_diagonal(estimator.covariance_, 0)
+    np.fill_diagonal(estimator.precision_, 0)    
     return estimator.covariance_, estimator.precision_
 
 
@@ -29,8 +31,10 @@ def run_subject(subtc_file, tc_subset=False):
         subtc_df = subtc_df[col_subset]
     subtc_zscored = pd.DataFrame(zscore(subtc_df), columns=subtc_df.columns)
     sub_cv, sub_precision = estimate_sub(subtc_zscored)
-    sub_cv1D = utils.flat_triu(sub_cv)
-    sub_precision1D = utils.flat_triu(sub_precision)
+    sub_cv_zscored = sub_cv = np.arctanh(sub_cv)
+    sub_precision_zscored = sub_cv = np.arctanh(sub_precision)
+    sub_cv1D = utils.flat_triu(sub_cv_zscored)
+    sub_precision1D = utils.flat_triu(sub_precision_zscored)
     return sub_cv1D, sub_precision1D
 
 
@@ -53,15 +57,15 @@ if __name__ == '__main__':
 
 
     #### Set parameters #######
-    datadir = '/home/jagust/rsfmri_ica/CPAC/connectivity/timecourses/MSDL_rois'
+    datadir = '/home/jagust/rsfmri_ica/CPAC/connectivity/timecourses/Greicius_90rois'
     outdir = '/home/jagust/rsfmri_ica/CPAC/connectivity/matrices'
-    outname = 'MSDL_rois_0-01_0-08'
+    outname = 'Greicius_90rois_0-01_0-08_subset.csv'
     tc_glob = 'B*_timecourses.csv'
     tc_files = glob(os.path.join(datadir, tc_glob))
     tc_files.sort()
-    tc_subset = ['DMN','DLPFC','Par','Post_Temp','Front_pol','IPS','LOC','ACC','STS','Ins','Cing']
+    tc_subset = ['anterior_Salience','dDMN','LECN','post_Salience','Precuneus','RECN','vDMN','Visuospatial']
     ###########################
 
-    main(datadir, outdir, outname, tc_files)
+    main(datadir, outdir, outname, tc_files, tc_subset)
 
 
