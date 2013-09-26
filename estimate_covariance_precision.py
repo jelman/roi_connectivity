@@ -19,6 +19,7 @@ def save_group_data(data_dict, outfile):
     
 
 def estimate_cov(tc_array):
+    print 'estimating covariance and precision matrices...'
     estimator = covariance.GraphLassoCV(max_iter=100, verbose=False)
     estimator.fit(tc_array)
     np.fill_diagonal(estimator.covariance_, 0)
@@ -27,6 +28,7 @@ def estimate_cov(tc_array):
     
 
 def estimate_corr_coh(tc_array, tr):
+    print 'estimating correlation and coherence matrices...'
     TR = tr
     f_lb = 0.01
     f_ub = 0.15
@@ -73,6 +75,7 @@ def main(datadir, outdir, outname, tc_files, tr, tc_subset=None, subgroup=None):
     group_coh = {} # Create empty dataframe to hold group coherence
     for subtc_file in tc_files:
         subid = utils.get_subid(subtc_file)
+        print 'Starting on subject %s'%(subid)
         if not subgroup:
             sub_cov, sub_precision, sub_corr, sub_coh = run_subject(subtc_file, 
                                                                     tr, 
@@ -90,6 +93,7 @@ def main(datadir, outdir, outname, tc_files, tr, tc_subset=None, subgroup=None):
             group_corr[subid] = sub_corr            
             group_coh[subid] = sub_coh
         else:
+            print 'Subject %s not in list of subject, skipping...'%(subid)
             continue   
     cov_outfile = os.path.join(outdir, ''.join(['Covariance_',outname,'.csv']))
     group_cov_df = save_group_data(group_cov, cov_outfile)
