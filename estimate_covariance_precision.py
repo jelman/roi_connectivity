@@ -19,7 +19,7 @@ def save_group_data(data_dict, outfile):
     
 
 def estimate_cov(tc_array):
-    estimator = covariance.GraphLassoCV(max_iter=1000, verbose=False)
+    estimator = covariance.GraphLassoCV(max_iter=100, verbose=False)
     estimator.fit(tc_array)
     np.fill_diagonal(estimator.covariance_, 0)
     np.fill_diagonal(estimator.precision_, 0)    
