@@ -11,7 +11,7 @@ def get_seedname(seedfile):
     _, nme, _ = utils.split_filename(seedfile)
     return nme
     
-def extract_seed_ts(data_files, roi, mask=None):
+def extract_seed_ts(data_files, roi, mask=None, subjstr):
     """ check shape match of data and seed
     if same assume registration
     extract mean of data in seed > 0"""
@@ -20,7 +20,7 @@ def extract_seed_ts(data_files, roi, mask=None):
     meants = {}
     roi_dat = nib.load(roi).get_data().squeeze()
     for subdat in data_files:
-        subid = get_subnum(subdat)
+        subid = gu.get_subid(subdat, subjstr)
         data_dat = nib.load(subdat).get_data()
         if mask:
             roi_dat[mask_dat == 0] = 0
@@ -28,32 +28,7 @@ def extract_seed_ts(data_files, roi, mask=None):
         tmp = data_dat[roi_dat > 0,:]
         meants.update({subid:tmp.mean(0)})
     return meants 
-    
-def get_subnum(instr, pattern='sub[0-9]{3}'):
-    """regexp to find pattern in string
-    default pattern = BXX-XXX  X is [0-9]
-    """
-    import re
-    m = re.search(pattern, instr)
-    try:
-        subnum = m.group()
-    except:
-        #print pattern, ' not found in ', instr
-        subnum = None
-    return subnum
-    
-def get_subid(instr, pattern='B[0-9]{2}-[0-9]{3}'):
-    """regexp to find pattern in string
-    default pattern = BXX-XXX  X is [0-9]
-    """
-    m = re.search(pattern, instr)
-    try:
-        subid = m.group()
-    except:
-        #print pattern, ' not found in ', instr
-        subid = None
-    return subid
-
+   
 def get_icnum(instr, pattern='ic00[0-9]{2}'):
     """regexp to find pattern in string
     default pattern = BXX-XXX  X is [0-9]
@@ -88,7 +63,7 @@ def save_to_csv(d, outfile, dropna=False):
     sorted_df.to_csv(outfile, sep=',', header=True, index=False)
     return sorted_df
     
-def main(data_files, roi_files, mask):
+def main(data_files, roi_files, mask, subjstr):
     datadict = {}
     for roifile in roi_files:
         roinme = get_seedname(roifile)
@@ -96,7 +71,7 @@ def main(data_files, roi_files, mask):
         dataglob = os.path.join(datadir, ''.join([icnum,'_sub*.nii']))
         data_files = glob(dataglob)
         data_files = sorted(data_files)
-        roimeants = extract_seed_ts(data_files, roifile, mask)
+        roimeants = extract_seed_ts(data_files, roifile, mask,subjstr)
         datadict.update({roinme:roimeants})
     datadf = save_to_csv(datadict, outfile, dropna=True)
         
@@ -117,9 +92,10 @@ if __name__ == '__main__':
     datadir = '/home/jagust/rsfmri_ica/data/Allsubs_YoungICA_2mm_IC30.gica/BPM/func_data/Young'
     roi_glob = '/home/jagust/rsfmri_ica/data/Allsubs_YoungICA_2mm_IC30.gica/BPM/results/PIB_Index/ResultsROIs/ic00*'
     roi_files = glob(roi_glob)
+    subjstr = 'sub[0-9]{3}'
     ##########################################################
 
-    main(datadir, roi_files, mask)
+    main(datadir, roi_files, mask, subjstr=subjstr)
 
         
 
